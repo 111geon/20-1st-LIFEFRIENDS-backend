@@ -9,11 +9,11 @@ class Review_Image(models.Model):
 
 class Review(models.Model):
     product          = models.ForeignKey('products.Product',on_delete=models.CASCADE)
-    user             = models.ForeignKey('products.Product',on_delete=models.CASCADE)   # 이건 나중에 'users.User" 로 바꿔야함 연결안시키면 엡 못만들어서 그냥 해놓은것임
+    user             = models.ForeignKey('users.User',on_delete=models.CASCADE)   
     review_image     = models.ForeignKey('Review_Image',on_delete=models.CASCADE)
     rating           = models.IntegerField()
     text             = models.CharField(max_length=2000)
     created_at       = models.DateTimeField(auto_now_add=True)
 
-    class Meta: 
+    class Meta:
         db_table = 'reviews'

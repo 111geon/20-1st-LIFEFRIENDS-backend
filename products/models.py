@@ -49,7 +49,7 @@ class Product_Image(models.Model):
 
 class Size(models.Model):
     name            = models.CharField(max_length=20)
-    product         = models.ManyToManyField('Product',through='Theme_Product')
+    product         = models.ManyToManyField('Product',through='Product_Size')
 
     class Meta:
         db_table = 'sizes'
@@ -59,6 +59,7 @@ class Product_Size(models.Model):
     size            = models.ForeignKey('Size',on_delete=models.CASCADE)
     quantity        = models.IntegerField()
 
-
+    class Meta:
+        db_table = 'products_sizes'
 
 

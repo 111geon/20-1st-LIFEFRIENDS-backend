@@ -10,7 +10,7 @@ class Selected_Product(models.Model):
         db_table = 'selected_products'
 
 class Order(models.Model):
-    user                   = models.ForeignKey('products.Product',on_delete=models.CASCADE)   # 이건 나중에 'users.User" 로 바꿔야함 연결안시키면 엡 못만들어서 그냥 해놓은것임
+    user                   = models.ForeignKey('users.User',on_delete=models.CASCADE)
     status                 = models.ForeignKey('Status',on_delete=models.CASCADE)  
     delivery_address       = models.CharField(max_length=200)
     recipient_phone_number = models.CharField(max_length=45) 
@@ -18,10 +18,10 @@ class Order(models.Model):
     created_at             = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_tables = 'orders'
+        db_table = 'orders'
 
-class Status(model.Models):
+class Status(models.Model):
     status                 = models.CharField(max_length=20)
 
     class Meta:
-        db_tables = 'status'
+        db_table = 'status'
