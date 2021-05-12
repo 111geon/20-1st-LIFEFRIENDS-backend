@@ -1,13 +1,13 @@
 from django.db import models
 
 # Create your models here.
-class Selected_Product(models.Model):
+class SelectedProduct(models.Model):
     product                = models.ForeignKey('products.Product',on_delete=models.CASCADE)
     order                  = models.ForeignKey('Order',on_delete=models.CASCADE)  
     quantity               = models.IntegerField()
 
     class Meta:
-        db_table = 'selected_products'
+        db_table = 'selectedproducts'
 
 class Order(models.Model):
     user                   = models.ForeignKey('users.User',on_delete=models.CASCADE)
