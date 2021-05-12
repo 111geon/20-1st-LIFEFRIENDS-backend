@@ -30,12 +30,12 @@ class ThemeProduct(models.Model):
         db_table = 'themesproducts'
 
 class Product(models.Model):
-    category            = models.ForeignKey('Category',on_delete=models.CASCADE)
-    name                = models.CharField(max_length=50)
-    cost                = models.DecimalField(max_digits=9, decimal_places=2)
-    created_at          = models.DateTimeField(auto_now_add=True)
-    clicks              = models.IntegerField(default=0)
-    description_img_url = models.URLField()
+    category              = models.ForeignKey('Category',on_delete=models.CASCADE)
+    name                  = models.CharField(max_length=50)
+    cost                  = models.DecimalField(max_digits=9, decimal_places=2)
+    created_at            = models.DateTimeField(auto_now_add=True)
+    clicks                = models.IntegerField(default=0)
+    description_iamge_url = models.URLField()
 
     class Meta: 
         db_table = 'products'
