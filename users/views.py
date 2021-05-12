@@ -20,7 +20,6 @@ class SignupView(View):
             birth_date   = data['birth_date']
             phone_number = data['phone_number']
             points       = 0
-            coupons      = ''
             gender       = data['gender']
 #            gender       = 
 
