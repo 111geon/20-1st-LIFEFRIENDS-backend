@@ -9,10 +9,23 @@ class User(models.Model):
     birth_date      = models.DateField()
     phone_number    = models.CharField(max_length=15)
     points          = models.IntegerField(default=0)
-    coupons         = models.CharField(max_length=200, blank=True)
-    
+    coupons         = models.ManyToManyField('Coupon',through='UserCoupon')
+
     class Meta:
         db_table = "users"
+
+class UserCoupon(models.Model):
+    user            = models.ForeignKey("User", on_delete=models.CASCADE)
+    coupon          = models.ForeignKey("Coupon", on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = "usercoupons"
+
+class Coupon(models.Model):
+    coupon          = models.CharField(max_length=200)           
+
+    class Meta:
+        db_table = "coupons"
 
 class Gender(models.Model):
     gender = models.CharField(max_length=20)
