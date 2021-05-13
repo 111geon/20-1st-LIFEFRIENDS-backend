@@ -19,7 +19,7 @@ class UserCoupon(models.Model):
     coupon          = models.ForeignKey("Coupon", on_delete=models.CASCADE)
 
     class Meta:
-        db_table = "usercoupons"
+        db_table = "user_coupons"
 
 class Coupon(models.Model):
     coupon          = models.CharField(max_length=200)           

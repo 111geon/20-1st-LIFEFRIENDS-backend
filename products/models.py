@@ -27,7 +27,7 @@ class ThemeProduct(models.Model):
     product         = models.ForeignKey('Product',on_delete=models.CASCADE)
 
     class Meta:
-        db_table = 'themesproducts'
+        db_table = 'themes_products'
 
 class Product(models.Model):
     category              = models.ForeignKey('Category',on_delete=models.CASCADE)
@@ -45,7 +45,7 @@ class ProductImage(models.Model):
     url             = models.URLField(max_length=2000)
 
     class Meta:
-        db_table = 'productimages'
+        db_table = 'product_images'
 
 class Size(models.Model):
     name            = models.CharField(max_length=20)
@@ -60,6 +60,6 @@ class ProductSize(models.Model):
     quantity        = models.IntegerField()
 
     class Meta:
-        db_table = 'productssizes'
+        db_table = 'products_sizes'
 
 

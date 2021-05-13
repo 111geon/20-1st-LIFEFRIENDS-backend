@@ -7,7 +7,7 @@ class SelectedProduct(models.Model):
     quantity               = models.IntegerField()
 
     class Meta:
-        db_table = 'selectedproducts'
+        db_table = 'selected_products'
 
 class Order(models.Model):
     user                   = models.ForeignKey('users.User',on_delete=models.CASCADE)
