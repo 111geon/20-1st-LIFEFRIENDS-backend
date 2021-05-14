@@ -10,7 +10,6 @@ from products.models import *
 from users.models import *
 from orders.models import *
 
-
 CSV_PATH_PRODUCTS= './CSV/menu.csv'
 with open(CSV_PATH_PRODUCTS) as in_file: 
     data_reader = csv.reader(in_file) 
@@ -38,8 +37,7 @@ with open(CSV_PATH_PRODUCTS) as in_file:
     data_reader = csv.reader(in_file) 
     next(data_reader, None)
     for row in data_reader:  
-        if row[0]:
-            menu_name = row[0]
+        menu_name = row[0]
         theme_name = row[1]
         menu_id=Menu.objects.get(name=menu_name)
         update, create = Theme.objects.update_or_create(menu=menu_id, name=theme_name)
@@ -84,8 +82,8 @@ with open(CSV_PATH_PRODUCTS) as in_file:
     for row in data_reader:  
         size = row[0]
         update, create = Size.objects.update_or_create(
-            name=size
-            )
+            name=size,
+        )
     update.save()
 
 CSV_PATH_PRODUCTS= './CSV/gender.csv'
@@ -125,7 +123,7 @@ CSV_PATH_PRODUCTS= './CSV/productsize.csv'
 with open(CSV_PATH_PRODUCTS) as in_file: 
     data_reader = csv.reader(in_file) 
     next(data_reader, None)
-    for row in data_reader:  
+    for row in data_reader: 
         product_name = row[0]
         size = row[1]
         quantity = row[2]
@@ -143,7 +141,6 @@ with open(CSV_PATH_PRODUCTS) as in_file:
     for row in data_reader:  
         theme_name = row[1]
         product_name = row[2]
-        print(theme_name, product_name)
         update, create = ThemeProduct.objects.update_or_create(
             product  = Product.objects.get(name=product_name),
             theme     = Theme.objects.get(name=theme_name),
