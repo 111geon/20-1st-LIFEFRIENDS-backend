@@ -10,9 +10,11 @@ class CategoryView(View):
         is_menu     = True if Menu.objects.filter(name=category).exists() else False
         is_theme    = True if Theme.objects.filter(name=category).exists() else False
         is_category = True if Category.objects.filter(name=category).exists() else False
+        is_all      = True if category=="all" else False
 
         if is_menu:
             menu = Menu.objects.get(name=category)
+            is_theme = True if menu.id < 7 else False
             categories = Theme.objects.filter(menu=menu) if is_theme else Category.objects.filter(menu=menu)
             results = self.makeResults(categories, is_theme)
         elif is_theme:
@@ -20,6 +22,9 @@ class CategoryView(View):
             results = self.makeResults(themes, is_theme)
         elif is_category:
             categories = Category.objects.filter(name=category)
+            results = self.makeResults(categories, is_theme)
+        elif is_all:
+            categories = Category.objects.all()
             results = self.makeResults(categories, is_theme)
         else:
             return JsonResponse({'MESSAGE': "INVALID_PATH"}, status=404)
@@ -37,7 +42,7 @@ class CategoryView(View):
                 products = Product.objects.filter(category=category)
             for product in products:
                 images     = product.productimage_set.all()
-                image_urls = [image.url[1:-1] if image.url[0]=='”' else image.url for image in images]
+                image_urls = [image.url[1:-1] if image.url[0]!='h' else image.url for image in images]
                 results.append(
                     {
                         'id'          : product.id,
