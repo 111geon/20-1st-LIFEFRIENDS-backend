@@ -13,23 +13,49 @@ class CategoryView(View):
         is_all      = True if category=="all" else False
 
         if is_menu:
-            menu = Menu.objects.get(name=category)
-            is_theme = True if menu.id < 7 else False
+            menu       = Menu.objects.get(name=category)
+            is_theme   = True if menu.id < 7 else False
             categories = Theme.objects.filter(menu=menu) if is_theme else Category.objects.filter(menu=menu)
-            results = self.makeResults(categories, is_theme)
+            results    = self.makeResults(categories, is_theme)
         elif is_theme:
-            themes = Theme.objects.filter(name=category)
-            results = self.makeResults(themes, is_theme)
+            themes     = Theme.objects.filter(name=category)
+            results    = self.makeResults(themes, is_theme)
         elif is_category:
             categories = Category.objects.filter(name=category)
-            results = self.makeResults(categories, is_theme)
+            results    = self.makeResults(categories, is_theme)
         elif is_all:
             categories = Category.objects.all()
-            results = self.makeResults(categories, is_theme)
+            results    = self.makeResults(categories, is_theme)
         else:
             return JsonResponse({'MESSAGE': "INVALID_PATH"}, status=404)
 
-        results = sorted(results, key = lambda product: product['clicks'])
+        sort = request.GET.get('sort', None)
+        if not sort or sort == "POPULAR":
+            results = sorted(
+                    results, 
+                    key= lambda product: product['clicks'], 
+                    reverse = True
+                    )
+        elif sort == "TOTALSALE":
+            pass
+        elif sort == "LOWPRICE":
+            results = sorted(
+                    results,
+                    key= lambda product: product['cost']
+                    )
+        elif sort == "RECENT":
+            results = sorted(
+                    results,
+                    key= lambda product: product['created_at'],
+                    reverse = True
+                    )
+        elif sort == "REVIEW":
+            pass
+        elif sort == "SATISFACTION":
+            pass
+        else:
+            pass
+
         return JsonResponse({'MESSAGE': results}, status=200)
 
 
