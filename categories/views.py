@@ -28,6 +28,7 @@ class CategoryView(View):
             results    = self.makeResults(categories, is_theme)
         else:
             return JsonResponse({'MESSAGE': "INVALID_PATH"}, status=404)
+        total_num = len(results)
 
         sort = request.GET.get('sort', None)
         if not sort or sort == "POPULAR":
@@ -37,7 +38,11 @@ class CategoryView(View):
                     reverse = True
                     )
         elif sort == "TOTALSALE":
-            pass
+            results = sorted(
+                    results, 
+                    key= lambda product: product['clicks'], 
+                    reverse = True
+                    )
         elif sort == "LOWPRICE":
             results = sorted(
                     results,
@@ -56,7 +61,15 @@ class CategoryView(View):
         else:
             pass
 
-        return JsonResponse({'MESSAGE': results}, status=200)
+        size = request.GET.get('size', '40')
+        size = int(size)
+
+        page = request.GET.get('page', '1')
+        page = int(page)
+
+        results = results[(page-1)*size:page*size]
+
+        return JsonResponse({'MESSAGE': results, 'TOTAL_NUM': total_num}, status=200)
 
 
     def makeResults(self, categories, is_theme):
