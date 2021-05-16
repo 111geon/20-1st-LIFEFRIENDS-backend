@@ -42,7 +42,7 @@ class CategoryView(View):
         elif sort == "TOTALSALE":
             results = sorted(
                     results, 
-                    key= lambda product: product['clicks'], 
+                    key= lambda product: product['sold'], 
                     reverse = True
                     )
         elif sort == "LOWPRICE":
@@ -57,11 +57,17 @@ class CategoryView(View):
                     reverse = True
                     )
         elif sort == "REVIEW":
-            pass
+            results = sorted(
+                    results,
+                    key= lambda product: product['reviewCount'],
+                    reverse = True
+                    )
         elif sort == "SATISFACTION":
-            pass
-        else:
-            pass
+            results = sorted(
+                    results,
+                    key= lambda product: product['rating'],
+                    reverse = True
+                    )
 
         size = request.GET.get('size', '40')
         size = int(size)
@@ -85,8 +91,17 @@ class CategoryView(View):
                 images     = product.productimage_set.all()
                 image_urls = [image.url[1:-1] if image.url[0]!='h' else image.url for image in images]
 
-                product_orders = ProductOrder.objects.filter(Q(product=product) & Q(1<status_id<5))
-                sold           = product_orders.aggregate(Sum('quantity'))['quantity__sum'] if product_orders.exists() else 0
+                product_orders = ProductOrder.objects.filter(
+                        Q(product=product) & 
+                        ~Q(status=Status.objects.get(id=1))
+                        ).exclude(status=Status.objects.get(id=5)
+                        )
+                sold = product_orders.aggregate(Sum('quantity'))['quantity__sum'] if product_orders.exists() else 0
+
+                product_reviews = product.review_set.all()
+                review_count    = product_reviews.count() if product_reviews.exists() else 0
+                rating          = product_reviews.aggregate(Avg('rating'))['rating__avg'] if product_reviews.exists() else 0
+
                 results.append(
                     {
                         'id'          : product.id,
@@ -96,8 +111,8 @@ class CategoryView(View):
                         'clicks'      : product.clicks,
                         'imgUrl'      : image_urls[0],
                         'imgAlt'      : product.name,
-                        'reviewCount' : 0,
-                        'rating'      : 0,
+                        'reviewCount' : review_count,
+                        'rating'      : rating,
                         'sold'        : sold,
                     }
                 )
