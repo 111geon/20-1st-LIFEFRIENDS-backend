@@ -85,7 +85,7 @@ class CategoryView(View):
                 images     = product.productimage_set.all()
                 image_urls = [image.url[1:-1] if image.url[0]!='h' else image.url for image in images]
 
-                product_orders = ProductOrder.objects.filter(Q(product=product))
+                product_orders = ProductOrder.objects.filter(Q(product=product) & Q(1<status_id<5))
                 sold           = product_orders.aggregate(Sum('quantity'))['quantity__sum'] if product_orders.exists() else 0
                 results.append(
                     {
