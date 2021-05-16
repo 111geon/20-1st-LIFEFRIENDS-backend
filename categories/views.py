@@ -1,9 +1,11 @@
 import json
 
-from django.http     import JsonResponse
-from django.views    import View
+from django.http      import JsonResponse
+from django.views     import View
+from django.db.models import Q, Sum, Avg
 
-from products.models import Menu, Category, Theme, Product
+from products.models  import Menu, Category, Theme, Product
+from orders.models    import ProductOrder, Order, Status
 
 class CategoryView(View):
     def get(self, request, category):
@@ -82,6 +84,9 @@ class CategoryView(View):
             for product in products:
                 images     = product.productimage_set.all()
                 image_urls = [image.url[1:-1] if image.url[0]!='h' else image.url for image in images]
+
+                product_orders = ProductOrder.objects.filter(Q(product=product))
+                sold           = product_orders.aggregate(Sum('quantity'))['quantity__sum'] if product_orders.exists() else 0
                 results.append(
                     {
                         'id'          : product.id,
@@ -93,7 +98,7 @@ class CategoryView(View):
                         'imgAlt'      : product.name,
                         'reviewCount' : 0,
                         'rating'      : 0,
-                        'sold'        : 0,
+                        'sold'        : sold,
                     }
                 )
         return results
