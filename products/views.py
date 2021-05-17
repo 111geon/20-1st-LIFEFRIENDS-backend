@@ -29,7 +29,7 @@ class SearchView(View):
                 results, 
                 key = lambda product_info: product_info['name']
             )
-        elif sort == 'LOWERPRICE':
+        elif sort == 'LOWPRICE':
             results = sorted(
                 results, 
                 key = lambda product_info: product_info['cost']
@@ -45,8 +45,10 @@ class SearchView(View):
                 key = lambda product_info: product_info['created_at']
             )
         elif sort == 'REVIEW':
-            pass
-        
+           results = sorted(
+                results,
+                key = lambda product_info: product_info['reviewCount']
+            )        
         Counted_sorted_products = len(results)
 
         return JsonResponse({'results':results, 'sorted_products': Counted_sorted_products}, status=200)
