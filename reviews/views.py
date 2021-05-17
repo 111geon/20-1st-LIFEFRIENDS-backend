@@ -5,7 +5,7 @@ from django.views import View
 from reviews.models import *
 from products.models import *
 from users.models import *
-
+from orders.models import *
 # Create your views here.
 class ReviewImageView(View):
     def post(self,request):
@@ -16,15 +16,36 @@ class ReviewImageView(View):
         )
         return JsonResponse({'MASSAGE':'SUCCESS'}, status=201)   
 
-class ReviewView(View):
-    def post(self,request):
-        data = json.loads(request.body)
-        Review.objects.create(
-            product      = Product.objects.get(name=data['product_name']),          # ForeignKey
-            user         = User.objects.get(name=data['user_name']),                # ForeignKey
-            review_image = ReviewImage.objects.get(name=data['review_image_url']),  # ForeignKey
-            rating       = data['rating'], # 1~5
-            text         = data['text'],
-        )
+# class ReviewView(View):
+#     def post(self,request):
+#         data = json.loads(request.body)
+#          = Product.productorder_set.all()    
 
-        return JsonResponse({'MASSAGE':'SUCCESS'}, status=201)
+# # 2. 해당상품의 구매자인지 확인 (무조건)
+        
+#         Review.objects.create(
+#             product      = product,          # ForeignKey
+#             user         = email,                # ForeignKey
+#             rating       = data['rating'], # 1~5
+#             text         = data['text'],
+#         )
+#         return JsonResponse({'MASSAGE':'SUCCESS'}, status=201)
+
+    # def get (self,request):
+    #     product_id = request.GET.get('id', None)
+    #     product = Product.objects.get(id=product_id)
+    #     reviews = product.review_set.all()
+
+    #     results = []
+    #     for review in reviews:
+    #         review_info = {
+    #             'user_name' : review.user.name,
+    #             'created_at' : review.created_at,
+    #             'product_size' : product.size,
+    #             'text' : review.text,
+    #             'review_image' : [review_images.review_image_url for review_images in review.reiewimage_set.all()],
+    #             'rating' : review
+    #         }
+    #         results.append(review_info)
+    #     return JsonResponse({'RESULTS': results}, status=201)
+
