@@ -6,7 +6,7 @@ from json.decoder           import JSONDecodeError
 from django.http            import JsonResponse
 from django.views           import View
 
-from users.models           import User, Gender
+from users.models           import User, Gender, Coupon
 from users.validations      import Validation
 from my_settings            import SECRET_KEY
 
@@ -86,3 +86,12 @@ class LoginView(View):
             return JsonResponse({'MESSAGE':'KEY_ERROR'}, status=400)
         except JSONDecodeError:
             return JsonResponse({'MESSAGE':'NO_BODY'}, status=400)
+
+class CouponView(View):
+    def get(self,request,coupon):
+        is_coupon = Coupon.objects.filter(coupon=coupon).exists()
+        if is_coupon:
+            coupon = Coupon.objects.get(coupon=coupon).coupon
+            return JsonResponse({'MESSAGE': coupon}, status=200)
+        else:
+            return JsonResponse({'MESSAGE': 'INVALID_COUPON'}, status=200)
