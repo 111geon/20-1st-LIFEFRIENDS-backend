@@ -9,8 +9,8 @@ class ReviewImage(models.Model):
         db_table = 'review_images'
 
 class Review(models.Model):
-    product          = models.ForeignKey('products.Product',on_delete=models.CASCADE)
-    user             = models.ForeignKey('users.User',on_delete=models.CASCADE)   
+    product_order    = models.ForeignKey('orders.ProductOrder',on_delete=models.CASCADE)
+    order            = models.ForeignKey('orders.Order',on_delete=models.CASCADE)   
     rating           = models.IntegerField()
     text             = models.CharField(max_length=2000)
     created_at       = models.DateTimeField(auto_now_add=True)
