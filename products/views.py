@@ -4,8 +4,9 @@ from django.http      import JsonResponse
 from django.views     import View
 from django.db.models import Q, Sum, Avg
 
-from products.models  import Menu, Category, Theme, Product
+from products.models  import Menu, Category, Theme, Product, ProductSize
 from orders.models    import ProductOrder, Order, Status
+from reviews.models   import Review
 
 class CategoryView(View):
     def get(self, request):
@@ -79,24 +80,27 @@ class CategoryView(View):
     def makeResults(self, categories):
         results = []
         for category in categories:
-            try:
+            if isinstance(category, Theme):
                 products = Product.objects.filter(theme=category)
-            except ValueError:
+            else:
                 products = Product.objects.filter(category=category)
             for product in products:
                 images     = product.productimage_set.all()
                 image_urls = [image.url[1:-1] if image.url[0]!='h' else image.url for image in images]
 
-                product_orders = ProductOrder.objects.filter(
-                        Q(product=product) & 
-                        ~Q(status=Status.objects.get(id=1))
-                        ).exclude(status=Status.objects.get(id=5)
-                        )
+                product_sizes   = ProductSize.objects.filter(product=product)
+                product_orders  = ProductOrder.objects.none()
+                product_reviews = Review.objects.none()
+                for product_size in product_sizes:
+                    product_orders |= ProductOrder.objects.filter(
+                            Q(product_size=product_size) & 
+                            ~Q(status=Status.objects.get(id=1))
+                            ).exclude(status=Status.objects.get(id=5)
+                            )
+                    product_reviews |= product_size.review_set.all()
                 sold = product_orders.aggregate(Sum('quantity'))['quantity__sum'] if product_orders.exists() else 0
-
-                product_reviews = product.review_set.all()
-                review_count    = product_reviews.count() if product_reviews.exists() else 0
-                rating          = product_reviews.aggregate(Avg('rating'))['rating__avg'] if product_reviews.exists() else 0
+                review_count = product_reviews.count() if product_reviews.exists() else 0
+                rating       = product_reviews.aggregate(Avg('rating'))['rating__avg'] if product_reviews.exists() else 0
 
                 results.append(
                     {
