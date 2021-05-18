@@ -10,10 +10,23 @@ from products.models import *
 class SearchView(View):
     def get(self,request):
         product_name = request.GET.get('search', None)
-        if product_name:
-            products = Product.objects.filter(name__contains=product_name)
+        products = Product.objects.filter(name__contains=product_name)
+        
+        sort = request.GET.get('sort', None)
+        if sort == None:
+            sorted_products = products.order_by('name')
+
+        if sort == 'LOWPRICE':
+            sorted_products = products.order_by('cost')
+        if sort == 'HIGHPRICE':
+            sorted_products = products.order_by('-cost')
+        if sort == 'RECENT':
+            sorted_products = products.order_by('created_at')
+        # if sort == 'REVIEW':
+        #     sorted_products = products.annoate(review_count=Count()
+
         results = []
-        for product in products:
+        for product in sorted_products:
             product_info = {
                 'category'  : product.category.name,
                 'name'      : product.name,
@@ -23,32 +36,7 @@ class SearchView(View):
             }
             results.append(product_info)
 
-        sort = request.GET.get('sorting', None)
-        if not 'sorting':
-            results = sorted(
-                results, 
-                key = lambda product_info: product_info['name']
-            )
-        elif sort == 'LOWPRICE':
-            results = sorted(
-                results, 
-                key = lambda product_info: product_info['cost']
-            )
-        elif sort == 'HIGHPRICE':
-            results = sorted(
-                results,
-                key = lambda product_info: -product_info['cost']
-            )
-        elif sort == 'RECENT':
-            results = sorted(
-                results,
-                key = lambda product_info: product_info['created_at']
-            )
-        elif sort == 'REVIEW':
-           results = sorted(
-                results,
-                key = lambda product_info: product_info['reviewCount']
-            )        
-        Counted_sorted_products = len(results)
 
-        return JsonResponse({'results':results, 'sorted_products': Counted_sorted_products}, status=200)
+        count_products = len(results)
+
+        return JsonResponse({'results':results, 'count_products': count_products}, status=200)
