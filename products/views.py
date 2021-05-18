@@ -7,6 +7,8 @@ class MenuNameView(View):
         menus    = Menu.objects.all()
         menulist = []
         
+        Review.objects.productsize__productorder__status
+
         for menu in menus:
             themes    = menu.theme_set.all() 
             themelist = [{'categoryid' : theme.id, 'categoryname' : theme.name} for theme in themes if theme.name != menu.name]
@@ -19,5 +21,5 @@ class MenuNameView(View):
                 'menuname'         : menu.name,
                 'categorylist'     : categorylist+themelist
             })
-        
+            
         return JsonResponse({'results':menulist}, status=200)
