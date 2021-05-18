@@ -17,7 +17,7 @@ class Validation:
 
                 token_payload = jwt.decode(
                         access_token,
-                        SECRET_KEY, 
+                        SECRET_KEY,
                         algorithms="HS256"
                         )
 
