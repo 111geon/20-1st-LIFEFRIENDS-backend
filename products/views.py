@@ -4,8 +4,10 @@ from typing import Text
 
 from django.http     import JsonResponse
 from django.views    import View
-from products.models import *
-# Create your views here.
+from django.db.models import Count
+
+from products.models import Product
+from reviews.models  import Review
 
 class SearchView(View):
     def get(self,request):
@@ -22,8 +24,8 @@ class SearchView(View):
             sorted_products = products.order_by('-cost')
         if sort == 'RECENT':
             sorted_products = products.order_by('created_at')
-        # if sort == 'REVIEW':
-        #     sorted_products = products.annoate(review_count=Count()
+        if sort == 'REVIEW':
+            sorted_products = products.annoate(count_review=Count('review').order_by('count_review')
 
         results = []
         for product in sorted_products:
@@ -35,8 +37,7 @@ class SearchView(View):
                 'created_at': product.created_at
             }
             results.append(product_info)
-
-
+            
         count_products = len(results)
 
         return JsonResponse({'results':results, 'count_products': count_products}, status=200)
