@@ -1,6 +1,7 @@
 import json
 import bcrypt
 import jwt
+import datetime
 from json.decoder           import JSONDecodeError
 
 from django.http            import JsonResponse
@@ -75,7 +76,10 @@ class LoginView(View):
                 return JsonResponse({'MESSAGE':'INVALID_PASSWORD'}, status=401)
             
             access_token = jwt.encode(
-                    {'user_id': user.id},
+                    {
+                        'user_id': user.id,
+                        'iat'    : datetime.datetime.now().timestamp()
+                    },
                     SECRET_KEY,
                     algorithm = 'HS256'
             ).decode('UTF-8')
