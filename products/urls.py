@@ -1,7 +1,7 @@
 from django.urls import path 
 
-from products.views import *
+from products.views import MenuNameView
 
 urlpatterns = [
-    path('/metadatas', MetadataView.as_view()),
+    path('/menuname', MenuNameView.as_view()),
 ]
