@@ -90,3 +90,13 @@ class LoginView(View):
             return JsonResponse({'MESSAGE':'KEY_ERROR'}, status=400)
         except JSONDecodeError:
             return JsonResponse({'MESSAGE':'NO_BODY'}, status=400)
+
+class UserView(View):
+    @Validation.validate_login
+    def get(self, request):
+        user = request.account
+        user_info = {
+                'user_name'  : user.name,
+                'user_email' : user.email+'@lifefriends.com'
+        }
+        return JsonResponse({'MESSAGE': 'SUCCESS', 'USER_INFO': user_info}, status=200)
