@@ -24,7 +24,8 @@ class ReviewView(View):
         try: 
             if not Product.objects.filter(id=product_id).exists():    
                 return JsonResponse({'MESSAGE':'INVALID_PRODUCT'}, status=400)  
-            if request.account.email not in ProductOrder.
+            DELIVERED = 4 # status_id = 4(배송완료) 
+            if (request.account.email) not in (ProductOrder.objects.filter(order__user__email=request.account.email)) and ProductOrder.objects.filter(status_id=DELIVERED)
 
             product  = Product.objects.get(id=product_id) 
             
