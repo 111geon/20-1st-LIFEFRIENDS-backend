@@ -1,103 +1,76 @@
 import json
 
-from django.http      import JsonResponse
-from django.views     import View
-from django.db.models import Q, Sum, Avg
+from django.http                import JsonResponse
+from django.views               import View
+from django.db.models           import Q, Count, Sum, Avg
+from django.db.models.functions import Coalesce
 
-from products.models  import Menu, Category, Theme, Product, ProductSize
-from orders.models    import ProductOrder, Order, Status
-from reviews.models   import Review
+from products.models  import Menu, Product
 
-class CategoryView(View):
+class ProductListView(View):
     def get(self, request):
-        menu     = request.GET.get('menu', None)
-        category = request.GET.get('category', None)
-        theme    = request.GET.get('theme', None)
+        MAX_THEME_MENU_ID = 7
+        try:
+            menu     = request.GET.get('menu', None)
+            category = request.GET.get('category', None)
+            theme    = request.GET.get('theme', None)
 
-        if menu:
-            menu       = Menu.objects.get(name=menu)
-            categories = Theme.objects.filter(menu=menu) if menu.id<7 else Category.objects.filter(menu=menu)
-            results    = self.makeResults(categories)
-        elif theme:
-            themes     = Theme.objects.filter(name=theme)
-            results    = self.makeResults(themes)
-        elif category:
-            categories = Category.objects.filter(name=category)
-            results    = self.makeResults(categories)
-        else:
-            categories = Category.objects.all()
-            results    = self.makeResults(categories)
-        total_num = len(results)
+            list_criteria = {}
+            if menu:
+                if Menu.objects.get(name=menu).id < MAX_THEME_MENU_ID:
+                    list_criteria['theme__menu__name'] = menu
+                else:
+                    list_criteria['category__menu__name'] = menu
+            elif category:
+                list_criteria['category__name'] = category
+            elif theme:
+                list_criteria['theme__name'] = theme
 
-        sort     = request.GET.get('sort', None)
-        sort_std = {
-                None           : ['clicks', True],
-                'POPULAR'      : ['clicks', True],
-                'TOTALSALE'    : ['sold', True],
-                'LOWPRICE'     : ['cost', False],
-                'RECENT'       : ['created_at', True],
-                'REVIEW'       : ['reviewCount', True],
-                'SATISFACTION' : ['rating', True]
-                }
-        results = sorted(
-                results,
-                key = lambda product: product[sort_std[sort][0]],
-                reverse = sort_std[sort][1]
-                )
-                
-        size = request.GET.get('size', '10')
-        size = int(size)
-        page = request.GET.get('page', '1')
-        page = int(page)
+            sort_criteria = {
+                    None           : '-clicks',
+                    'POPULAR'      : '-clicks',
+                    'TOTALSALE'    : '-sold',
+                    'LOWPRICE'     : 'cost',
+                    'RECENT'       : '-created_at',
+                    'REVIEW'       : '-review_count',
+                    'SATISFACTION' : '-rating'
+            }
+            sort = request.GET.get('sort', None)
+            sort = None if sort not in sort_criteria else sort
 
-        results = results[(page-1)*size:page*size]
-        return JsonResponse({'MESSAGE': results, 'TOTAL_NUM': total_num}, status=200)
+            products = Product.objects.filter(**list_criteria)
+            products = products.annotate(review_count=Count('productsize__review'))
+            products = products.annotate(rating=Coalesce(Avg('productsize__review__rating'), 0.0))
+            products = products.annotate(sold=Coalesce(Sum('productsize__productorder__quantity', filter=Q(productsize__productorder__status__id__range=(2,4))), 0))
+            products = products.order_by(sort_criteria[sort])
 
+            size     = int(request.GET.get('size', '10'))
+            page     = int(request.GET.get('page', '1'))
+            offset   = (page-1) * size
+            limit    = page * size
+            sliced_products = products[offset:limit]
+            
+            results = [
+                    {
+                        'id'          : product.id,
+                        'name'        : product.name,
+                        'cost'        : int(product.cost),
+                        'created_at'  : product.created_at,
+                        'clicks'      : product.clicks,
+                        'imgUrl'      : product.productimage_set.first().url,
+                        'imgAlt'      : product.name,
+                        'reviewCount' : product.review_count,
+                        'rating'      : product.rating,
+                        'sold'        : product.sold
+                    } for product in sliced_products
+            ]
+                   
+            return JsonResponse({'MESSAGE': results, 'TOTAL_NUM': len(products)}, status=200)
+        except Menu.DoesNotExist:
+            return JsonResponse({'MESSAGE': 'INVALID_KEYWORD'}, status=400)
+        except ValueError:
+            return JsonResponse({'MESSAGE': 'INVALID_KEYWORD'}, status=400)
 
-    def makeResults(self, categories):
-        results = []
         
-        products = []
-        for category in categories:
-            try:
-                products += list(Product.objects.filter(theme=category))
-            except ValueError:
-                products += list(Product.objects.filter(category=category))
-
-        for product in products:
-            images     = product.productimage_set.all()
-            image_urls = [image.url[1:-1] if image.url[0]!='h' else image.url for image in images]
-
-            sold            = 0
-            review_count    = 0
-            rating          = 0
-            product_sizes   = product.productsize_set.all()
-            for product_size in product_sizes:
-                product_orders = product_size.productorder_set.filter(
-                        ~Q(status_id=1) &
-                        ~Q(status_id=5)
-                        )
-                sold += product_orders.aggregate(Sum('quantity'))['quantity__sum'] if product_orders.exists() else 0
-
-                product_reviews  = product_size.review_set.all()
-                review_count    += len(product_reviews)
-                rating          += product_reviews.aggregate(Sum('rating'))['rating__sum'] if product_reviews.exists() else 0
-            rating = rating / review_count if review_count else 0
-
-            results.append(
-                {
-                    'id'          : product.id,
-                    'name'        : product.name,
-                    'cost'        : int(product.cost),
-                    'created_at'  : product.created_at,
-                    'clicks'      : product.clicks,
-                    'imgUrl'      : image_urls[0],
-                    'imgAlt'      : product.name,
-                    'reviewCount' : review_count,
-                    'rating'      : rating,
-                    'sold'        : sold,
-                }
-            )
-        return results
 
 
