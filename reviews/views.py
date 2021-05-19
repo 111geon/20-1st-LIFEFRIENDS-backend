@@ -1,9 +1,14 @@
 import json
+from json import JSONDecodeError
+
 
 from django.http import JsonResponse
 from django.views import View
+
 from reviews.models import ReviewImage
 from products.models import Product
+from orders.models  import ProductOrder
+from users.validations import Validation
 
 class ReviewImageView(View):
     def post(self,request):
@@ -13,15 +18,30 @@ class ReviewImageView(View):
         return JsonResponse({'MASAGE':'SUCCESS'}, status=201)   
 
 class ReviewView(View):
-    def post(self,request):
+    @Validation.validate_login
+    def post(self,request,product_id):
         data = json.loads(request.body)
+        try: 
+            if not Product.objects.filter(id=product_id).exists():    
+                return JsonResponse({'MESSAGE':'INVALID_PRODUCT'}, status=400)  
+            if request.account.email not in ProductOrder.
 
-        product_name      = Product.objects.get(name=data['product_name'])
-        product_size      = Size.objects.get(name=data['product_size'])
-        products_quantity = ProductSize.objects.get(product=product_name, size=product_size)
-        in_cart_products  = products_quantity.productorder_set.filter(status_id=1)
-        ordered_users     = [in_cart_product.order.user.name for in_cart_product in in_cart_products]
-        user              = User.objects.get(email=data['user_email'])
+            product  = Product.objects.get(id=product_id) 
+            
+            size     = product.size_set.get(name=data['product_size'])
+            quantity = data['quantity']
+            
+        except: 
+
+
+
+
+            product_name      = Product.objects.get(name=data['product_name'])
+            product_size      = Size.objects.get(name=data['product_size'])
+            products_quantity = ProductSize.objects.get(product=product_name, size=product_size)
+            in_cart_products  = products_quantity.productorder_set.filter(status_id=1)
+            ordered_users     = [in_cart_product.order.user.name for in_cart_product in in_cart_products]
+            user              = User.objects.get(email=data['user_email'])
 
         if not user.name in ordered_users:
             return JsonResponse({'MASAGE':'INVAILID_USER'}, status=201)   
