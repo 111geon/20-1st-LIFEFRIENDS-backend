@@ -23,15 +23,14 @@ class SearchView(View):
             if sort == 'RECENT':
                 sorted_products = products.order_by('created_at')
             if sort == 'REVIEW':
-                a =Product.objects.filter(name__contains='쿠션')
-                sorted_products = a.annotate(count_review=Count('productsize__review')).order_by('count_review')
+                sorted_products =  [product.productsize_set.aggregate(count_review=Count('review')) for product in products]
 
             product_info = [{
                 'category'  : product.category.name,
                 'name'      : product.name,
                 'cost'      : product.cost,
                 'image_url' : product.productimage_set.first().url,
-                'created_at': product.created_at
+                'created_at': product.created_at,
             } for product in sorted_products]
             
             return JsonResponse({'results':product_info}, status=200)

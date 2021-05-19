@@ -86,3 +86,4 @@ class LoginView(View):
             return JsonResponse({'MESSAGE':'KEY_ERROR'}, status=400)
         except JSONDecodeError:
             return JsonResponse({'MESSAGE':'NO_BODY'}, status=400)
+
