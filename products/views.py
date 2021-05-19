@@ -17,6 +17,7 @@ class ProductView(View):
         
         product    = Product.objects.get(id=product_id)
         productdetail = {
+            'product_id'       : product.id,
             'images'           : [product_images.url for product_images in product.productimage_set.all()],
             'menu'             : product.category.menu.name,
             'category'         : product.category.name,
