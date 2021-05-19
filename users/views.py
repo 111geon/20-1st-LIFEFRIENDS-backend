@@ -89,11 +89,11 @@ class LoginView(View):
             return JsonResponse({'MESSAGE':'NO_BODY'}, status=400)
 
 class CouponView(View):
-    @Validation.validate_login
+    # @Validation.validate_login
     def get(self,request,coupon):
         is_coupon = Coupon.objects.filter(coupon=coupon).exists()
         if is_coupon:
             coupon = Coupon.objects.get(coupon=coupon).coupon
-            return JsonResponse({'COUPON': coupon, 'USER': request.account.name}, status=200)
+            return JsonResponse({'MESSAGE': coupon,}, status=200)
         else:
             return JsonResponse({'MESSAGE': 'INVALID_COUPON'}, status=200)
