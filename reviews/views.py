@@ -8,50 +8,44 @@ from django.views import View
 from reviews.models import ReviewImage
 from products.models import Product
 from orders.models  import ProductOrder
+from reviews.models import Review, ReviewImage
 from users.validations import Validation
-
-class ReviewImageView(View):
-    def post(self,request):
-        data = json.loads(request.body)
-        #CreateData
-        ReviewImage.objects.create(review_image_url = data['review_image_url'])
-        return JsonResponse({'MASAGE':'SUCCESS'}, status=201)   
 
 class ReviewView(View):
     @Validation.validate_login
     def post(self,request,product_id):
-        data = json.loads(request.body)
-        try: 
+        try:
+            data = json.loads(request.body)
+            product  = Product.objects.get(id=product_id) 
+            size     = product.size_set.get(name=data['product_size'])   
+
             if not Product.objects.filter(id=product_id).exists():    
                 return JsonResponse({'MESSAGE':'INVALID_PRODUCT'}, status=400)  
+            if not product.size_set.filter(name=data['product_size']).exists():    
+                return JsonResponse({'MESSAGE':'INVALID_SIZE'}, status=400)   
+
             DELIVERED = 4 # status_id = 4(배송완료) 
-            if (request.account.email) not in (ProductOrder.objects.filter(order__user__email=request.account.email)) and ProductOrder.objects.filter(status_id=DELIVERED)
+            if not ProductOrder.objects.filter(order__user=request.account, status_id=DELIVERED):
+                return JsonResponse({'MESSAGE':'NO_PURCHASE_HISTORY'}, status=400)  
 
-            product  = Product.objects.get(id=product_id) 
-            
-            size     = product.size_set.get(name=data['product_size'])
-            quantity = data['quantity']
-            
-        except: 
+            review_info = Review.objects.create(
+                product_size = size.name,
+                user_name    = request.account.name,
+                rating       = data['rating'],
+                text         = data['text'],
+            )
 
+            review_image = ReviewImage.objects.create(
+                review_image_url = data['review_image_url'],
+                review_id        = review_info.id,
+            )
 
+            return JsonResponse({'REVIEW':review_info, 'REVIEW_IMAGE': review_image}, status=400)
 
-
-            product_name      = Product.objects.get(name=data['product_name'])
-            product_size      = Size.objects.get(name=data['product_size'])
-            products_quantity = ProductSize.objects.get(product=product_name, size=product_size)
-            in_cart_products  = products_quantity.productorder_set.filter(status_id=1)
-            ordered_users     = [in_cart_product.order.user.name for in_cart_product in in_cart_products]
-            user              = User.objects.get(email=data['user_email'])
-
-        if not user.name in ordered_users:
-            return JsonResponse({'MASAGE':'INVAILID_USER'}, status=201)   
-            
-        Review.objects.create(
-            rating       = data['rating'], # 1~5
-            text         = data['text'],
-        )
-        return JsonResponse({'MASSAGE':'SUCCESS'}, status=201)
+        except KeyError: 
+            return JsonResponse({'MESSAGE':'INVALID_INPUT'}, status=400)
+        except JSONDecodeError:
+            return JsonResponse({'MESSAGE':'INVALID_INPUT'}, status=400)
 
     # def get (self,request):
     #     product_id = request.GET.get('id', None)
