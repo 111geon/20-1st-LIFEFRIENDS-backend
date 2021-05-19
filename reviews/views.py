@@ -3,17 +3,13 @@ import json
 from django.http import JsonResponse
 from django.views import View
 from reviews.models import ReviewImage
-from products.models import *
-from users.models import *
-from orders.models import *
-# Create your views here.
+from products.models import Product
+
 class ReviewImageView(View):
     def post(self,request):
         data = json.loads(request.body)
         #CreateData
-        ReviewImage.objects.create(
-            review_image_url = data['review_image_url'],
-        )
+        ReviewImage.objects.create(review_image_url = data['review_image_url'])
         return JsonResponse({'MASAGE':'SUCCESS'}, status=201)   
 
 class ReviewView(View):
