@@ -10,6 +10,7 @@ from users.models           import User, Gender, Coupon
 from users.validations      import Validation
 from my_settings            import SECRET_KEY
 
+
 class SignupView(View):
     def post(self, request):
         try:
@@ -88,10 +89,11 @@ class LoginView(View):
             return JsonResponse({'MESSAGE':'NO_BODY'}, status=400)
 
 class CouponView(View):
+    @Validation.validate_login
     def get(self,request,coupon):
         is_coupon = Coupon.objects.filter(coupon=coupon).exists()
         if is_coupon:
             coupon = Coupon.objects.get(coupon=coupon).coupon
-            return JsonResponse({'MESSAGE': coupon}, status=200)
+            return JsonResponse({'COUPON': coupon, 'USER': request.account.name}, status=200)
         else:
             return JsonResponse({'MESSAGE': 'INVALID_COUPON'}, status=200)
