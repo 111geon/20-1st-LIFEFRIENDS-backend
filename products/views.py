@@ -1,16 +1,17 @@
 import json
-
 from json import JSONDecodeError
 
 from django.http     import JsonResponse
 from django.views    import View
 
 from products.models import Product
+from users.validations import Validation
 
 class ProductView(View):
+    @Validation.validate_login
     def post(self,request,product_id):        
         try: 
-            data    = json.loads(request.body)
+            data     = json.loads(request.body)
             product  = Product.objects.get(id=product_id) 
             size     = product.size_set.get(name=data['product_size'])
             quantity = data['quantity']
@@ -21,9 +22,10 @@ class ProductView(View):
                 return JsonResponse({'MESSAGE':'INVALID_SIZE'}, status=400)   
 
             results = {
-                'product_size' : size.name,
+                'product_size'     : size.name,
                 'product_quantity' : quantity,
-                'total_price' : int(product.cost) * int(quantity)
+                'total_price'      : int(product.cost) * int(quantity),
+                'user'             : request.account.name
             }
             return JsonResponse({'RESULTS': results}, status=200)
         
