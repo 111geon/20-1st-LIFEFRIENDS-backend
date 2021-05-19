@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 class ProductOrder(models.Model):
-    productsize            = models.ForeignKey('products.ProductSize',on_delete=models.CASCADE)
+    product_size           = models.ForeignKey('products.ProductSize',on_delete=models.CASCADE)
     order                  = models.ForeignKey('Order',on_delete=models.CASCADE)  
     quantity               = models.IntegerField()
     status                 = models.ForeignKey('Status',on_delete=models.CASCADE)
