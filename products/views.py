@@ -44,7 +44,7 @@ class ProductListView(View):
             products = products.annotate(sold=Coalesce(Sum('productsize__productorder__quantity', filter=Q(productsize__productorder__status__id__range=(2,4))), 0))
             products = products.order_by(sort_criteria[sort])
 
-            size     = int(request.GET.get('size', '10'))
+            size     = int(request.GET.get('size', '8'))
             page     = int(request.GET.get('page', '1'))
             offset   = (page-1) * size
             limit    = page * size
@@ -70,7 +70,3 @@ class ProductListView(View):
             return JsonResponse({'MESSAGE': 'INVALID_KEYWORD'}, status=400)
         except ValueError:
             return JsonResponse({'MESSAGE': 'INVALID_KEYWORD'}, status=400)
-
-        
-
-
