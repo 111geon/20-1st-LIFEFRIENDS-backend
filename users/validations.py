@@ -21,7 +21,7 @@ class Validation:
                         algorithms="HS256"
                         )
 
-                expiration_delta = 600
+                expiration_delta = 60000000
                 now = datetime.datetime.now().timestamp()
                 if now > token_payload['iat'] + expiration_delta:
                     return JsonResponse({'MESSAGE': 'TOKEN_EXPIRED'}, status=401)
