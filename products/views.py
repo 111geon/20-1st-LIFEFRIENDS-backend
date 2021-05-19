@@ -23,8 +23,7 @@ class SearchView(View):
             if sort == 'RECENT':
                 sorted_products = products.order_by('created_at')
             if sort == 'REVIEW':
-                sorted_products =  [product.productsize_set.aggregate(count_review=Count('review')) for product in products]
-
+                sorted_products = products.annotate(count_review=Count('productsize__review')).order_by('count_review')
             product_info = [{
                 'category'  : product.category.name,
                 'name'      : product.name,

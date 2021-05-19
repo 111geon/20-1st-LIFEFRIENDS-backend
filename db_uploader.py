@@ -3,15 +3,15 @@ import django
 import csv
 import sys
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'life_friends.settings') # 지금 장고 내부에있는 뷰나 모델파일이아닌 외부 파이썬 파일을 작성하고 있으므로, 이파일이 장고에 적용될수 있도록 설정 해주는것
-django.setup() # 적용 시켜주고
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'life_friends.settings') 
+django.setup() 
 
 from products.models import * 
 from users.models import *
 from orders.models import *
 
 
-CSV_PATH_PRODUCTS = './CSV/menu.csv' ’ # 가지고있는 CSV경로도 변수화 해서 저장
+CSV_PATH_PRODUCTS = './CSV/menu.csv'  # 가지고있는 CSV경로도 변수화 해서 저장
 with open(CSV_PATH_PRODUCTS) as in_file: # CSV_PATH_PRODUCTS 경로에서 in_file 이란 이름으로 파일열기
     data_reader = csv.reader(in_file)  # 데이터 한줄 씩 읽기
     next(data_reader, None) # 첫줄을 스킵하기위해 추가
