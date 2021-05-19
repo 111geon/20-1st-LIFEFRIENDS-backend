@@ -4,15 +4,19 @@ from typing import Text
 
 from django.http     import JsonResponse
 from django.views    import View
-from products.models import *
-from users.models    import *
-# Create your views here.
+
+from products.models import Product
+
 class ProductView(View):
     def get(self,request):
         product_id = request.GET.get('id', None)
+        if not product_id:     
+            return JsonResponse({'MESSAGE':'NOT_FOUND_ID'}, status=400)   
+        if int(product_id) > Product.objects.count():
+            return JsonResponse({'MESSAGE':'NOT_FOUND_PRODUCT'}, status=400)   
+        
         product    = Product.objects.get(id=product_id)
-        producList = []
-        SpecificProduct_info = {
+        productdetail = {
             'images'           : [product_images.url for product_images in product.productimage_set.all()],
             'menu'             : product.category.menu.name,
             'category'         : product.category.name,
@@ -22,5 +26,4 @@ class ProductView(View):
             'description'      : product.description_iamge_url,
             'size'             : [product_size.name for product_size in product.size_set.all()]
         }
-        producList.append(SpecificProduct_info)
-        return JsonResponse({'results':producList}, status=200)
+        return JsonResponse({'productdetail':productdetail}, status=200)
