@@ -78,15 +78,11 @@ class CartView(View):
         size_name  = data['size']
         user       = request.account
 
-        product_size = ProductSize.objects.filter(
-                product_id = product_id,
-                size__name = size_name
-                ).first()
-
         ProductOrder.objects.filter(
-                order__user=user,
-                product_size=product_size,
-                status_id=CART_STATUS_ID
+                order__user              = user,
+                product_size__product_id = product_id,
+                product_size__size__name = size_name,
+                status_id                = CART_STATUS_ID
                 ).delete()
 
         cart = make_cart(user)
