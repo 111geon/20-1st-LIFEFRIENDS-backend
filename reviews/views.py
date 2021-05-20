@@ -20,7 +20,7 @@ class ReviewView(View):
     @validate_login
     def post(self, request, product_id):
         try:
-            DELIVERED = 4 # status_id = 4(배송완료) 
+            DELIVERED = 2 # status_id = 4(배송완료) 
 
             data = json.loads(request.body)
             
