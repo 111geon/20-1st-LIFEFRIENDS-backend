@@ -1,13 +1,41 @@
 import json
 import random
+
 from typing import Text
+from json import JSONDecodeError
 
 from django.http                import JsonResponse
 from django.views               import View
 from django.db.models           import Q, Count, Sum, Avg
 from django.db.models.functions import Coalesce
+from django.core.exceptions     import ObjectDoesNotExist
 
-from products.models  import Menu, Product
+from users.validations          import Validation
+from products.models            import Menu, Product
+
+class ProductView(View):
+    def get(self,request, product_id):
+        try: 
+            product = Product.objects.get(id=product_id) 
+
+            product_detail = {
+                'product_id' : product.id,
+                'images'     : [product_images.url for product_images in product.productimage_set.all()],
+                'menu'       : product.category.menu.name,
+                'category'   : product.category.name,
+                'name'       : product.name,
+                'cost'       : product.cost,
+                'clicks'     : product.clicks,
+                'description': product.description_iamge_url,
+                'size'       : [product_size.name for product_size in product.size_set.all()]
+            }
+            
+            return JsonResponse({'productdetail': product_detail}, status=200)
+       
+        except KeyError:
+            return JsonResponse({'MESSAGE':'KeyError'}, status=200)
+        except Product.DoesNotExist:
+            return JsonResponse({'MESSAGE':'NOT_FOUND_PRODUCT_ID'}, status=400)
 
 class ProductListView(View):
     def get(self, request):
@@ -106,6 +134,7 @@ class SearchView(View):
         
         except KeyError:
             return JsonResponse({'MESSAGE':'KeyError'}, status=200)
+
 class MenuView(View):
     def get(self,request):
         try:
