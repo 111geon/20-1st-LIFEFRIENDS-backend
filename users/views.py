@@ -60,7 +60,6 @@ class SignupView(View):
         except Gender.DoesNotExist:
             return JsonResponse({'MESSAGE': 'INVALID_GENDER'}, status=400)
 
-
 class LoginView(View):
     def post(self, request):
         try:
