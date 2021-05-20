@@ -7,6 +7,7 @@ from django.http  import JsonResponse
 from my_settings  import SECRET_KEY
 from users.models import User
 
+class Validation:
     def validate_email(self, email):
         regex = re.compile('^[0-9a-z\-\_]{5,20}$')
         if not regex.match(email):
