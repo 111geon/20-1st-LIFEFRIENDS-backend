@@ -16,30 +16,26 @@ from products.models            import Menu, Product
 class ProductView(View):
     def get(self,request, product_id):
         try: 
-            product  = Product.objects.get(id=product_id) 
-            if not Product.objects.filter(id=product_id).exists():    
-                return JsonResponse({'MESSAGE':'NOT_FOUND_PRODUCT_ID'}, status=400)   
-            if int(product_id) > Product.objects.count():
-                return JsonResponse({'MESSAGE':'NOT_FOUND_PRODUCT'}, status=400)   
-            
-            product    = Product.objects.get(id=product_id)
-            productdetail = {
-                'product_id'       : product.id,
-                'images'           : [product_images.url for product_images in product.productimage_set.all()],
-                'menu'             : product.category.menu.name,
-                'category'         : product.category.name,
-                'name'             : product.name,
-                'cost'             : product.cost,
-                'clicks'           : product.clicks,
-                'description'      : product.description_iamge_url,
-                'size'             : [product_size.name for product_size in product.size_set.all()]
+            product = Product.objects.get(id=product_id) 
+
+            product_detail = {
+                'product_id' : product.id,
+                'images'     : [product_images.url for product_images in product.productimage_set.all()],
+                'menu'       : product.category.menu.name,
+                'category'   : product.category.name,
+                'name'       : product.name,
+                'cost'       : product.cost,
+                'clicks'     : product.clicks,
+                'description': product.description_iamge_url,
+                'size'       : [product_size.name for product_size in product.size_set.all()]
             }
-            return JsonResponse({'productdetail':productdetail}, status=200)
+            
+            return JsonResponse({'productdetail': product_detail}, status=200)
        
         except KeyError:
             return JsonResponse({'MESSAGE':'KeyError'}, status=200)
-        except ObjectDoesNotExist:
-            return JsonResponse({'MESSAGE':'NO_PRODUCT'}, status=200)
+        except Product.DoesNotExist:
+            return JsonResponse({'MESSAGE':'NOT_FOUND_PRODUCT_ID'}, status=400)
 
 class ProductListView(View):
     def get(self, request):
