@@ -1,5 +1,10 @@
 import re
+import jwt
+import datetime
 
+from django.http  import JsonResponse
+
+from my_settings  import SECRET_KEY
 from users.models import User
 
 class Validation:

@@ -1,6 +1,7 @@
 import json
 import bcrypt
 import jwt
+import datetime
 from json.decoder           import JSONDecodeError
 
 from django.http            import JsonResponse
@@ -9,6 +10,7 @@ from django.views           import View
 from users.models           import User, Gender
 from users.validations      import Validation
 from my_settings            import SECRET_KEY
+from decorators             import validate_login
 
 class SignupView(View):
     def post(self, request):
@@ -75,7 +77,10 @@ class LoginView(View):
                 return JsonResponse({'MESSAGE':'INVALID_PASSWORD'}, status=401)
             
             access_token = jwt.encode(
-                    {'user_id': user.id},
+                    {
+                        'user_id': user.id,
+                        'iat'    : datetime.datetime.now().timestamp()
+                    },
                     SECRET_KEY,
                     algorithm = 'HS256'
             ).decode('UTF-8')
@@ -86,3 +91,13 @@ class LoginView(View):
             return JsonResponse({'MESSAGE':'KEY_ERROR'}, status=400)
         except JSONDecodeError:
             return JsonResponse({'MESSAGE':'NO_BODY'}, status=400)
+
+class UserView(View):
+    @validate_login
+    def get(self, request):
+        user = request.account
+        user_info = {
+                'user_name'  : user.name,
+                'user_email' : user.email+'@lifefriends.com'
+        }
+        return JsonResponse({'MESSAGE': 'SUCCESS', 'USER_INFO': user_info}, status=200)
