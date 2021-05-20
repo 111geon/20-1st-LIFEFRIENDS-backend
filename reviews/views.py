@@ -70,12 +70,16 @@ class ReviewView(View):
                     'review_image' : [review_images.review_image_url for review_images in review.reviewimage_set.all()],
                     'rating'       : review.rating,
                     } for review in productsize.review_set.all()]
-           
+
+                rate_average       = reviews.aggregate(rate_average=Avg('rating'))  
+                total_review_count = reviews.aggregate(total_review_count=Count('id'))  
+                photo_review_count = reviews.aggregate(photo_review_count=Count('reviewimage'))
+
                 review_summary = {
-                    'rate_average' : reviews.aggregate(Avg('rating')),
+                    'rate_average' : float("%.2f" % rate_average['rate_average']),
                     'rate_count'   : [reviews_count for reviews_count in reviews.values('rating').annotate(rate_count=Count('rating'))],
-                    'total_review_count' : reviews.aggregate(Count('id')),
-                    'photo_review_count' : reviews.aggregate(Count('reviewimage'))
+                    'total_review_count' : total_review_count['total_review_count'],
+                    'photo_review_count' : photo_review_count['photo_review_count']
                 }
 
                 return JsonResponse({'review_info' :review_info, 'review_summary': review_summary}, status=200)
