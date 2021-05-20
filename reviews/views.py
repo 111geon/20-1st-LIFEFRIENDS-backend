@@ -8,41 +8,36 @@ from django.db.models import Count, Avg
 from django.core.exceptions import ObjectDoesNotExist
 
 from reviews.models import ReviewImage
-from products.models import Product, Size
+from products.models import Product, ProductSize
 from orders.models  import ProductOrder
 from reviews.models import Review, ReviewImage
-from users.models import User
+from users.models   import User
+from decorators     import validate_login
 
 from users.validations import Validation
 
 class ReviewView(View):
-    @Validation.validate_login
-    def post(self,request,product_id):
+    @validate_login
+    def post(self, request, product_id):
         try:
+            DELIVERED = 4 # status_id = 4(배송완료) 
+
             data = json.loads(request.body)
             
-            product     = Product.objects.get(id=product_id) 
-            size        = Size.objects.get(name=data['product_size'])
-            productsize = product.productsize_set.get(product_id=product_id, size_id=size)
-            user        = User.objects.get(id=request.account.id)
+            product_size = ProductSize.objects.get(product_id=product_id, size__name=data['product_size'])
+            user         = User.objects.get(id=request.account.id)  
 
-            if not Product.objects.filter(id=product_id).exists():    
-                return JsonResponse({'MESSAGE':'INVALID_PRODUCT'}, status=400)  
-            if not product.size_set.filter(name=data['product_size']).exists():    
-                return JsonResponse({'MESSAGE':'INVALID_SIZE'}, status=400)   
-
-            DELIVERED = 4 # status_id = 4(배송완료) 
             if not ProductOrder.objects.filter(order__user=request.account, status_id=DELIVERED):
                 return JsonResponse({'MESSAGE':'NO_PURCHASE_HISTORY'}, status=400)  
 
             review_info = Review.objects.create(
-                product_size = productsize,
+                product_size = product_size,
                 user         = user,
                 rating       = data['rating'],
                 text         = data['text'],
             )
 
-            review_image = ReviewImage.objects.create(
+            ReviewImage.objects.create(
                 review_image_url = data['review_image_url'],
                 review_id        = review_info.id,
             )
