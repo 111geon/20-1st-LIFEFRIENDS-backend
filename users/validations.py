@@ -44,4 +44,3 @@ class Validation:
         elif User.objects.filter(phone_number=phone_number):
             return False
         return True
-
