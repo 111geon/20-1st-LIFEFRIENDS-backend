@@ -53,12 +53,13 @@ class ReviewView(View):
             return JsonResponse({'MESSAGE':'INVALID_INPUT'}, status=400)
         except JSONDecodeError:
             return JsonResponse({'MESSAGE':'INVALID_INPUT'}, status=400)
+            
 
     def get (self,request, product_id):
         try:
             product  = Product.objects.get(id=product_id) 
             if not Product.objects.filter(id=product_id).exists():    
-                return JsonResponse({'MESSAGE':'INVALID_PRODUCT'}, status=400)  
+                return JsonResponse({'MESSAGE':'INVALID_PRODUCT'}, status=400)
             
             for productsize in product.productsize_set.all():
                 reviews = productsize.review_set.all()
@@ -86,3 +87,5 @@ class ReviewView(View):
         
         except KeyError:
             return JsonResponse({'MESSAGE':'INVALID_PRODUCT'}, status=400)  
+        except TypeError:
+            return JsonResponse({'MESSAGE':'NO_REVIEW'}, status=400)  
