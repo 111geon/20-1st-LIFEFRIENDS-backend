@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 class ReviewImage(models.Model):
-    review_image_url = models.URLField(max_length=2000)
+    review_image_url = models.URLField(max_length=2000, blank=True)
     review           = models.ForeignKey('Review',on_delete=models.CASCADE)
 
     class Meta: 
