@@ -93,15 +93,43 @@ class CartView(View):
 
         return JsonResponse({'MESSAGE': 'SUCCESS', 'CART': cart}, status=201)
 
-#class PurchaseView(View):
-#    @validate_login
-#    def post(self, request):
-#        try:
-#            return JsonResponse({'MESSAGE': 'SUCCESS', 'CART': cart}, status=201)
-#        except json.decoder.JSONDecodeError:
-#            return JsonResponse({'MESSAGE': 'NO_BODY'}, status=400)
-#        except KeyError:
-#            return JsonResponse({'MESSAGE': 'KEY_ERROR'}, status=400)
+class PurchaseView(View):
+    @validate_login
+    def post(self, request):
+        try:
+            data       = json.loads(request.body)
+            product_id = data['product_id']
+            size_name  = data['size']
+            quantity   = int(data['quantity'])
+            user       = request.account
+
+            product_size = ProductSize.objects.filter(
+                    product_id = product_id,
+                    size__name = size_name
+                    ).first()
+
+            if quantity > product_size.quantity: 
+                return JsonResponse({'MESSAGE': 'NO_INVENTORY', 'INVENTORY': product_size.quantity}, status=400)
+
+            product_order = ProductOrder.objects.filter(
+                    order__user  = user,
+                    product_size = product_size,
+                    status_id    = CART_STATUS_ID,
+                    quantity     = quantity
+                    ).first()
+            if not product_order:
+                return JsonResponse({'MESSAGE': 'NO_PRODUCT'}, status=400)
+            else:
+                product_size.quantity -= quantity
+                product_size.save()
+                product_order.status_id += 1
+                product_order.save()
+
+            return JsonResponse({'MESSAGE': 'SUCCESS'}, status=201)
+        except json.decoder.JSONDecodeError:
+            return JsonResponse({'MESSAGE': 'NO_BODY'}, status=400)
+        except KeyError:
+            return JsonResponse({'MESSAGE': 'KEY_ERROR'}, status=400)
 
 def make_cart(user):
     product_orders = ProductOrder.objects.filter(order__user=user, status_id=CART_STATUS_ID)
