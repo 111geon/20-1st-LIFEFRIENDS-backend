@@ -20,7 +20,9 @@ class ProductView(View):
                 return JsonResponse({'MESSAGE':'INVALID_PRODUCT'}, status=400)  
             if not product.size_set.filter(name=data['product_size']).exists():    
                 return JsonResponse({'MESSAGE':'INVALID_SIZE'}, status=400)   
-
+            if int(product_id) > Product.objects.count():
+                return JsonResponse({'MESSAGE':'NOT_FOUND_PRODUCT'}, status=400)   
+                            
             results = {
                 'product_size'     : size.name,
                 'product_quantity' : quantity,
