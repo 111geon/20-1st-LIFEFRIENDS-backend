@@ -12,6 +12,7 @@ from django.core.exceptions     import ObjectDoesNotExist
 
 from users.validations          import Validation
 from products.models            import Menu, Product
+from decorators                 import validate_login
 
 class ProductView(View):
     def get(self,request, product_id):
@@ -33,9 +34,9 @@ class ProductView(View):
             return JsonResponse({'productdetail': product_detail}, status=200)
        
         except KeyError:
-            return JsonResponse({'MESSAGE':'KeyError'}, status=200)
+            return JsonResponse({'message':'KeyError'}, status=200)
         except Product.DoesNotExist:
-            return JsonResponse({'MESSAGE':'NOT_FOUND_PRODUCT_ID'}, status=400)
+            return JsonResponse({'message':'NOT_FOUND_PRODUCT_ID'}, status=400)
 
 class ProductListView(View):
     def get(self, request):
@@ -100,11 +101,11 @@ class ProductListView(View):
 
             total_num = Product.objects.filter(**list_criteria).count()
                    
-            return JsonResponse({'MESSAGE': results, 'TOTAL_NUM': total_num}, status=200)
+            return JsonResponse({'message': results, 'TOTAL_NUM': total_num}, status=200)
         except Menu.DoesNotExist:
-            return JsonResponse({'MESSAGE': 'INVALID_KEYWORD'}, status=400)
+            return JsonResponse({'message': 'INVALID_KEYWORD'}, status=400)
         except ValueError:
-            return JsonResponse({'MESSAGE': 'INVALID_KEYWORD'}, status=400)
+            return JsonResponse({'message': 'INVALID_KEYWORD'}, status=400)
 
 class SearchView(View):
     def get(self,request):
@@ -133,7 +134,7 @@ class SearchView(View):
             return JsonResponse({'results':product_info}, status=200)
         
         except KeyError:
-            return JsonResponse({'MESSAGE':'KeyError'}, status=200)
+            return JsonResponse({'message':'KeyError'}, status=200)
 
 class MenuView(View):
     def get(self,request):
@@ -154,4 +155,4 @@ class MenuView(View):
             return JsonResponse({'results':menus}, status=200)
 
         except KeyError:
-            return JsonResponse({'MESSAGE':'KEY_ERROR'}, status=400)
+            return JsonResponse({'message':'KEY_ERROR'}, status=400)
