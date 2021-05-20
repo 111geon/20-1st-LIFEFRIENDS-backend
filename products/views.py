@@ -14,6 +14,8 @@ class ProductListView(View):
             menu     = request.GET.get('menu', None)
             category = request.GET.get('category', None)
             theme    = request.GET.get('theme', None)
+            size     = int(request.GET.get('size', '200'))
+            page     = int(request.GET.get('page', '1'))
 
             list_criteria = {}
             if menu:
@@ -38,18 +40,19 @@ class ProductListView(View):
             sort = request.GET.get('sort', None)
             sort = None if sort not in sort_criteria else sort
 
-            products = Product.objects.filter(**list_criteria)
-            products = products.annotate(review_count=Count('productsize__review'))
-            products = products.annotate(rating=Coalesce(Avg('productsize__review__rating'), 0.0))
-            products = products.annotate(sold=Coalesce(Sum('productsize__productorder__quantity', filter=Q(productsize__productorder__status__id__range=(2,4))), 0))
-            products = products.order_by(sort_criteria[sort])
-
-            size     = int(request.GET.get('size', '200'))
-            page     = int(request.GET.get('page', '1'))
             offset   = (page-1) * size
             limit    = page * size
-            sliced_products = products[offset:limit]
-            
+
+            products = Product.objects\
+                    .filter(**list_criteria)\
+                    .annotate(
+                            review_count=Count('productsize__review'),
+                            rating=Coalesce(Avg('productsize__review__rating'), 0.0),
+                            sold=Coalesce(Sum('productsize__productorder__quantity',
+                                filter=Q(productsize__productorder__status__id__range=(2,4))), 0)
+                            )\
+                    .order_by(sort_criteria[sort])[offset:limit]
+
             results = [
                     {
                         'id'          : product.id,
@@ -62,10 +65,12 @@ class ProductListView(View):
                         'reviewCount' : product.review_count,
                         'rating'      : product.rating,
                         'sold'        : product.sold
-                    } for product in sliced_products
+                    } for product in products
             ]
+
+            total_num = Product.objects.filter(**list_criteria).count()
                    
-            return JsonResponse({'MESSAGE': results, 'TOTAL_NUM': len(products)}, status=200)
+            return JsonResponse({'MESSAGE': results, 'TOTAL_NUM': total_num}, status=200)
         except Menu.DoesNotExist:
             return JsonResponse({'MESSAGE': 'INVALID_KEYWORD'}, status=400)
         except ValueError:
