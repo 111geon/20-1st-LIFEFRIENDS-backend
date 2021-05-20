@@ -156,30 +156,3 @@ class MenuView(View):
 
         except KeyError:
             return JsonResponse({'message':'KEY_ERROR'}, status=400)
-
-class PurchaseView(View):
-    @validate_login
-    def post(self,request,product_id):        
-        try: 
-            data     = json.loads(request.body)
-            product  = Product.objects.get(id=product_id) 
-            size     = product.size_set.get(name=data['product_size'])
-            quantity = data['quantity']
-            
-            if not product.size_set.filter(name=data['product_size']).exists():    
-                return JsonResponse({'message':'INVALID_SIZE'}, status=400)   
-                            
-            results = {
-                'product_size'     : size.name,
-                'product_quantity' : quantity,
-                'total_price'      : int(product.cost) * int(quantity),
-                'user'             : request.account.name
-            }
-            return JsonResponse({'results': results}, status=200)
-        
-        except JSONDecodeError:
-            return JsonResponse({'message':'INVALID_INPUT'}, status=400)
-        except KeyError:
-            return JsonResponse({'message':'INVALID_INPUT'}, status=400)
-        except Product.DoesNotExist:
-            return JsonResponse({'message':'NO_PRODUCT'}, status=400)
