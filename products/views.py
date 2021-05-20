@@ -34,9 +34,9 @@ class ProductView(View):
             return JsonResponse({'productdetail': product_detail}, status=200)
        
         except KeyError:
-            return JsonResponse({'MESSAGE':'KeyError'}, status=200)
+            return JsonResponse({'message':'KeyError'}, status=200)
         except Product.DoesNotExist:
-            return JsonResponse({'MESSAGE':'NOT_FOUND_PRODUCT_ID'}, status=400)
+            return JsonResponse({'message':'NOT_FOUND_PRODUCT_ID'}, status=400)
 
 class ProductListView(View):
     def get(self, request):
@@ -101,11 +101,11 @@ class ProductListView(View):
 
             total_num = Product.objects.filter(**list_criteria).count()
                    
-            return JsonResponse({'MESSAGE': results, 'TOTAL_NUM': total_num}, status=200)
+            return JsonResponse({'message': results, 'TOTAL_NUM': total_num}, status=200)
         except Menu.DoesNotExist:
-            return JsonResponse({'MESSAGE': 'INVALID_KEYWORD'}, status=400)
+            return JsonResponse({'message': 'INVALID_KEYWORD'}, status=400)
         except ValueError:
-            return JsonResponse({'MESSAGE': 'INVALID_KEYWORD'}, status=400)
+            return JsonResponse({'message': 'INVALID_KEYWORD'}, status=400)
 
 class SearchView(View):
     def get(self,request):
@@ -134,7 +134,7 @@ class SearchView(View):
             return JsonResponse({'results':product_info}, status=200)
         
         except KeyError:
-            return JsonResponse({'MESSAGE':'KeyError'}, status=200)
+            return JsonResponse({'message':'KeyError'}, status=200)
 
 class MenuView(View):
     def get(self,request):
@@ -155,7 +155,7 @@ class MenuView(View):
             return JsonResponse({'results':menus}, status=200)
 
         except KeyError:
-            return JsonResponse({'MESSAGE':'KEY_ERROR'}, status=400)
+            return JsonResponse({'message':'KEY_ERROR'}, status=400)
 
 class PurchaseView(View):
     @validate_login
@@ -166,12 +166,8 @@ class PurchaseView(View):
             size     = product.size_set.get(name=data['product_size'])
             quantity = data['quantity']
             
-            if not Product.objects.filter(id=product_id).exists():    
-                return JsonResponse({'MESSAGE':'INVALID_PRODUCT'}, status=400)  
             if not product.size_set.filter(name=data['product_size']).exists():    
-                return JsonResponse({'MESSAGE':'INVALID_SIZE'}, status=400)   
-            if int(product_id) > Product.objects.count():
-                return JsonResponse({'MESSAGE':'NOT_FOUND_PRODUCT'}, status=400)   
+                return JsonResponse({'message':'INVALID_SIZE'}, status=400)   
                             
             results = {
                 'product_size'     : size.name,
@@ -179,9 +175,11 @@ class PurchaseView(View):
                 'total_price'      : int(product.cost) * int(quantity),
                 'user'             : request.account.name
             }
-            return JsonResponse({'RESULTS': results}, status=200)
+            return JsonResponse({'results': results}, status=200)
         
         except JSONDecodeError:
-            return JsonResponse({'MESSAGE':'INVALID_INPUT'}, status=400)
+            return JsonResponse({'message':'INVALID_INPUT'}, status=400)
         except KeyError:
-            return JsonResponse({'MESSAGE':'INVALID_INPUT'}, status=400)
+            return JsonResponse({'message':'INVALID_INPUT'}, status=400)
+        except Product.DoesNotExist:
+            return JsonResponse({'message':'NO_PRODUCT'}, status=400)
