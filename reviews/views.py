@@ -4,6 +4,8 @@ from json import JSONDecodeError
 
 from django.http import JsonResponse
 from django.views import View
+from django.db.models import F, Sum, Count, Case, When, Avg
+
 
 from reviews.models import ReviewImage
 from products.models import Product
@@ -47,20 +49,26 @@ class ReviewView(View):
         except JSONDecodeError:
             return JsonResponse({'MESSAGE':'INVALID_INPUT'}, status=400)
 
-    # def get (self,request):
-    #     product_id = request.GET.get('id', None)
-    #     product = Product.objects.get(id=product_id)
-    #     reviews = product.review_set.all()
+    def get (self,request, product_id):
+        try:
+            product  = Product.objects.get(id=product_id) 
+            if not Product.objects.filter(id=product_id).exists():    
+                return JsonResponse({'MESSAGE':'INVALID_PRODUCT'}, status=400)  
+            
+            reviews = [productsize.review_set.all() for productsize in product.productsize_set.all()]
+            review_info = [{
+                'user_name'    : review,
+                'created_at'   : review.created_at,
+                'product_size' : review.product_size.size.name,
+                'text'         : review.text,
+                'review_image' : [review_images.review_image_url for review_images in review.reiewimage_set.all()],
+                'rating'       : review,
+                'rate_average' : reviews.aggregate(rate_average=Avg('rating')),
+                'rate_count'   : reviews.annotate(rate_count=Count('rating')),
+                'total_review_count' : reviews.aggregate(total_review_count=Sum('review')),
+                'photo_review_count' : reviews.aggregate(photo_review_count=Count('reviewimage')),
+                } for review in reviews]
 
-    #     results = []
-    #     for review in reviews:
-    #         review_info = {
-    #             'user_name' : review.user.name,
-    #             'created_at' : review.created_at,
-    #             'product_size' : product.size,
-    #             'text' : review.text,
-    #             'review_image' : [review_images.review_image_url for review_images in review.reiewimage_set.all()],
-    #             'rating' : review
-    #         }
-    #         results.append(review_info)
-    #     return JsonResponse({'RESULTS': results}, status=201)
+            return JsonResponse({'review_info' : review_info}, status=200)
+        except KeyError:
+            return JsonResponse({'MESSAGE':'INVALID_PRODUCT'}, status=400)  
