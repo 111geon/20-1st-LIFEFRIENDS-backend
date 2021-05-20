@@ -5,7 +5,7 @@ from json import JSONDecodeError
 from django.http import JsonResponse
 from django.views import View
 from django.db.models import Count, Avg
-
+from django.core.exceptions import ObjectDoesNotExist
 
 from reviews.models import ReviewImage
 from products.models import Product, Size
@@ -60,7 +60,7 @@ class ReviewView(View):
             product  = Product.objects.get(id=product_id) 
             if not Product.objects.filter(id=product_id).exists():    
                 return JsonResponse({'MESSAGE':'INVALID_PRODUCT'}, status=400)
-            
+                
             for productsize in product.productsize_set.all():
                 reviews = productsize.review_set.all()
                 review_info = [{
@@ -89,3 +89,6 @@ class ReviewView(View):
             return JsonResponse({'MESSAGE':'INVALID_PRODUCT'}, status=400)  
         except TypeError:
             return JsonResponse({'MESSAGE':'NO_REVIEW'}, status=400)  
+        except ObjectDoesNotExist:
+            return JsonResponse({'MESSAGE':'INVALID_PRODUCT'}, status=400)  
+        
