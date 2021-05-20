@@ -3,18 +3,18 @@ import django
 import csv
 import sys
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'life_friends.settings')
-django.setup()
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'life_friends.settings') 
+django.setup() 
 
 from products.models import * 
 from users.models import *
 from orders.models import *
 
 
-CSV_PATH_PRODUCTS= './CSV/menu.csv'
-with open(CSV_PATH_PRODUCTS) as in_file: 
-    data_reader = csv.reader(in_file) 
-    next(data_reader, None)
+CSV_PATH_PRODUCTS = './CSV/menu.csv'  # 가지고있는 CSV경로도 변수화 해서 저장
+with open(CSV_PATH_PRODUCTS) as in_file: # CSV_PATH_PRODUCTS 경로에서 in_file 이란 이름으로 파일열기
+    data_reader = csv.reader(in_file)  # 데이터 한줄 씩 읽기
+    next(data_reader, None) # 첫줄을 스킵하기위해 추가
     for row in data_reader:  
         if row[0]:
             menu_name = row[0]
