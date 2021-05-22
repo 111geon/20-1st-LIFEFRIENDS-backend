@@ -58,6 +58,8 @@ class CartView(View):
             return JsonResponse({'MESSAGE': 'NO_BODY'}, status=400)
         except KeyError:
             return JsonResponse({'MESSAGE': 'KEY_ERROR'}, status=400)
+        except AttributeError:
+            return JsonResponse({'MESSAGE': 'KEY_ERROR'}, status=400)
 
     @validate_login
     def get(self, request):

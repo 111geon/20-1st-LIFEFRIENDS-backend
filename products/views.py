@@ -45,13 +45,13 @@ class ProductListView(View):
             menu     = request.GET.get('menu', None)
             category = request.GET.get('category', None)
             theme    = request.GET.get('theme', None)
-            size     = int(request.GET.get('size', '200'))
+            size     = int(request.GET.get('size', '40'))
             page     = int(request.GET.get('page', '1'))
 
             list_criteria = {}
             if menu:
                 if Menu.objects.get(name=menu).id < MAX_THEME_MENU_ID:
-                    list_criteria['theme__menu__name'] = menu
+                    list_criteria['theme__menu__name'] = menu #filter(theme__menu__name="캐릭터")
                 else:
                     list_criteria['category__menu__name'] = menu
             elif category:
@@ -140,14 +140,14 @@ class MenuView(View):
     def get(self,request):
         try:
             menus = [{
-                    'id'        : menu.id,
-                    'menu'      : menu.name,
-                    'categories': [{
-                            'id'      : category.id, 
-                            'category': category.name
+                    'menuId'        : menu.id,
+                    'menuName'      : menu.name,
+                    'categoryList': [{
+                            'categoryId'      : category.id, 
+                            'categoryName': category.name
                     } for category in menu.category_set.all()] + [{
-                            'id'      : theme.id, 
-                            'category': theme.name
+                            'categoryId'      : theme.id, 
+                            'categoryName': theme.name
                     } for theme in menu.theme_set.all() 
                     if theme.name != menu.name]
             } for menu in Menu.objects.all()]
