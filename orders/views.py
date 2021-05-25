@@ -19,16 +19,15 @@ class CartView(View):
             quantity   = int(data['quantity'])
             user       = request.account
 
-            product_size = ProductSize.objects.filter(
+            product_size = ProductSize.objects.get(
                     product_id = product_id,
                     size__name = size_name
-                    ).first()
+                    )
 
             if quantity > product_size.quantity: 
                 return JsonResponse({'MESSAGE': 'NO_INVENTORY', 'INVENTORY': product_size.quantity}, status=400)
             
-            order = Order.objects.filter(user=user).first() \
-                    or Order.objects.create(
+            order = Order.objects.get_or_create(
                             user                   = user,
                             delivery_address       = 'address',
                             recipient_name         = user.name,
